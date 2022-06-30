@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# In[1]:
 
 
 import pandas as pd
@@ -23,28 +23,32 @@ def get_connection(db, user=env.username, host=env.host, password=env.password):
 # Obtain your data from the Codeup Data Science Database.
 
 
+# In[ ]:
+
+
+
+
+
 # In[4]:
 
 
-titanic_df = pd.read_sql('Select * from passengers', get_connection('titanic_db'))
-titanic_df.head(1)
+# returns titanic data from codeup data science database
+def new_titanic_data():
+    sql='Select * from passengers'
+    df = pd.read_sql(sql, get_connection('titanic_db'))
+                        
+    
+    
+    return df
 
 
 # In[5]:
 
 
-# returns titanic data from codeup data science database
-def get_titanic_data():
-    return titanic_df
+new_titanic_data()
 
 
 # In[6]:
-
-
-get_titanic_data()
-
-
-# In[7]:
 
 
 # Make a function named get_iris_data that returns the data from the iris_db on the codeup data science database as a pandas data frame. 
@@ -55,23 +59,18 @@ get_titanic_data()
 # In[8]:
 
 
-sql= '''select * from measurements 
-join species using (species_id)
-'''
-iris_db = pd.read_sql(sql, get_connection('iris_db'))
-iris_db.head()
+def iris_data():
+    sql= '''
+        select * from measurements 
+        join species using (species_id)
+        '''
+    df = pd.read_sql(sql, get_connection('iris_db'))
+    return df
+
+iris_data()
 
 
-# In[9]:
-
-
-def get_iris_data():
-    return iris_db
-
-get_iris_data()
-
-
-# In[10]:
+# In[ ]:
 
 
 # Make a function named get_telco_data that returns the data from the telco_churn database in SQL. 
@@ -79,62 +78,78 @@ get_iris_data()
 # Obtain your data from the Codeup Data Science Database.
 
 
-# In[11]:
+# In[10]:
 
 
-sql= ''' select * from customers
-join customer_payments using(payment_type_id)
-join internet_service_types using(internet_service_type_id)
-join customer_contracts using(contract_type_id)
-'''
+def new_telco_data():
+    sql_query = """
+                select * from customers
+                join contract_types using (contract_type_id)
+                join internet_service_types using (internet_service_type_id)
+                join payment_types using (payment_type_id)
+                """
+    
+    # Read in DataFrame from Codeup db.
+    df = pd.read_sql(sql_query, get_connection('telco_churn'))
+    
+    return df
+
+new_telco_data().head()
 
 
 # In[ ]:
 
 
-telco_db = pd.read_sql(sql, get_connection('telco_churn'))
-telco_db.head()
 
-
-# In[ ]:
-
-
-def get_telco_data():
-    return telco.db
-
-get_telco_data()
 
 
 # ###  Once you've got your get_titanic_data, get_iris_data, and get_telco_data functions written, now it's time to add caching to them. To do this, edit the beginning of the function to check for the local filename of telco.csv, titanic.csv, or iris.csv. If they exist, use the .csv file. If the file doesn't exist,  then produce the SQL and pandas necessary to create a dataframe, then write the dataframe to a .csv file with the appropriate name.
 
-# In[ ]:
+# In[17]:
 
 
+# below reads iris database from codeup, writes data to csv file if local file doenot exist
 def get_titanic_data():
     filename = "titanic.csv"
     if os.path.isfile(filename):
         return pd.read_csv(filename)
     else:
-        titanic_df = pd.read_sql('Select * from passengers', get_connection('titanic_db'))
-        titanic_df.to_file(filename)
-        return titanic_df
+        df = new_titanic_data()
+        df.to_csv(filename)
+        return df
+    
+
     
 
 
-# In[ ]:
+# In[18]:
 
 
+titanic= get_titanic_data()
+titanic.head()
+
+
+# In[15]:
+
+
+# function below reads iris database from codeup, writes data to csv file if local file doenot exist
 def get_iris_data():
     filename = "iris.csv"
     if os.path.isfile(filename):
         return pd.read_csv(filename)
     else:
-        iris_db = pd.read_sql('select * from measurements join species using (species_id)', get_connection('iris_db'))
-        titanic_df.to_file(filename)
-        return titanic_df
+        df= iris_data()  # data from dataframe
+        df.to_csv(filename)    #cache data
+        return df
 
 
-# In[ ]:
+# In[16]:
+
+
+get_iris_data().head()
+
+
+# In[24]:
 
 
 def get_telco_data():
@@ -142,13 +157,15 @@ def get_telco_data():
     if os.path.isfile(filename):
         return pd.read_csv(filename)
     else:
-        telco_db = pd.read_sql('''select * from customers
-                                  join customer_payments using(payment_type_id)
-                                  join internet_service_types using(internet_service_type_id)
-                                  join customer_contracts using(contract_type_id)''', get_connection('telco_churn'))
+        df= new_telco_data()
+        df.to_csv(filename)
+        return df
 
-        telco_db.tofile(filename)
-        return telco.db
+
+# In[25]:
+
+
+get_telco_data().head()
 
 
 # In[ ]:
